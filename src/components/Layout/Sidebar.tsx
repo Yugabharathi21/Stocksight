@@ -10,7 +10,8 @@ import {
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
-  Building2
+  Building2,
+  Brain
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -27,6 +28,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
     { id: 'products', label: 'Products', icon: Package },
+    { id: 'trendwise', label: 'TrendWise AI', icon: Brain },
     { id: 'forecast', label: 'Forecast', icon: TrendingUp },
     { id: 'upload', label: 'Upload Data', icon: Upload },
     { id: 'alerts', label: 'Alerts', icon: AlertTriangle },

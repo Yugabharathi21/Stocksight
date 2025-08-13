@@ -12,6 +12,7 @@ import AlertsPanel from './components/Alerts/AlertsPanel';
 import ReportsPanel from './components/Reports/ReportsPanel';
 import UserManagement from './components/Users/UserManagement';
 import OrganizationManagement from './components/Organizations/OrganizationManagement';
+import TrendWiseAI from './components/TrendWise/TrendWiseAI';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { testDatabaseConnection, testUserCreation, makeUserAdmin } from './utils/debugDatabase';
 
@@ -73,6 +74,8 @@ const AppContent: React.FC = () => {
             <ProductTable products={products} />
           </div>
         );
+      case 'trendwise':
+        return <TrendWiseAI />;
       case 'forecast':
         return (
           <div className="space-y-6">

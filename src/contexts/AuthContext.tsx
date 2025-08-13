@@ -30,6 +30,90 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const loadUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        // If user doesn't exist in custom users table, create one
+        if (error.code === 'PGRST116') {
+          console.log('User profile not found, creating new profile...');
+          const { data: authUser } = await supabase.auth.getUser();
+          if (authUser.user) {
+            const { error: insertError } = await supabase
+              .from('users')
+              .insert([
+                {
+                  id: authUser.user.id,
+                  email: authUser.user.email!,
+                  name: authUser.user.user_metadata?.name || authUser.user.email!.split('@')[0],
+                  is_admin: authUser.user.email === 'admin@stocksight.com',
+                },
+              ]);
+            
+            if (insertError) {
+              console.error('Error creating user profile:', insertError);
+              // Fallback to auth user data
+              setUser({
+                id: authUser.user.id,
+                name: authUser.user.user_metadata?.name || authUser.user.email!.split('@')[0],
+                email: authUser.user.email!,
+                role: authUser.user.email === 'admin@stocksight.com' ? 'admin' : 'staff',
+                avatar: authUser.user.user_metadata?.avatar_url,
+              });
+              return;
+            }
+            
+            // Fetch the newly created profile
+            const { data: newProfile } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', userId)
+              .single();
+              
+            if (newProfile) {
+              setUser({
+                id: newProfile.id,
+                name: newProfile.name,
+                email: newProfile.email,
+                role: newProfile.is_admin ? 'admin' : 'staff',
+                avatar: newProfile.avatar_url,
+              });
+            }
+          }
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      setUser({
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        role: data.is_admin ? 'admin' : 'staff',
+        avatar: data.avatar_url,
+      });
+    } catch (err) {
+      console.error('Error loading user profile:', err);
+      // Fallback: create user from auth data if profile loading fails
+      const { data: authUser } = await supabase.auth.getUser();
+      if (authUser.user) {
+        setUser({
+          id: authUser.user.id,
+          name: authUser.user.user_metadata?.name || authUser.user.email!.split('@')[0],
+          email: authUser.user.email!,
+          role: authUser.user.email === 'admin@stocksight.com' ? 'admin' : 'staff',
+          avatar: authUser.user.user_metadata?.avatar_url,
+        });
+      }
+    }
+  };
+
   React.useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
@@ -52,28 +136,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const loadUserProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) throw error;
-
-      setUser({
-        id: data.id,
-        name: data.name,
-        email: data.email,
-        role: data.is_admin ? 'admin' : 'staff',
-        avatar: data.avatar_url,
-      });
-    } catch (err) {
-      console.error('Error loading user profile:', err);
-    }
-  };
 
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);

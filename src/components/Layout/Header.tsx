@@ -34,10 +34,10 @@ const Header: React.FC = () => {
           
           <div className="flex items-center space-x-3 pl-4 border-l border-[#A3B18A]/30">
             <div className="flex items-center space-x-3">
-              {user?.avatar ? (
+              {user?.avatar_url ? (
                 <img 
-                  src={user.avatar} 
-                  alt={user.name}
+                  src={user.avatar_url} 
+                  alt={user.full_name || user.email}
                   className="w-8 h-8 rounded-full object-cover"
                 />
               ) : (
@@ -46,7 +46,7 @@ const Header: React.FC = () => {
                 </div>
               )}
               <div>
-                <p className="text-sm font-medium text-[#2F3E2F]">{user?.name}</p>
+                <p className="text-sm font-medium text-[#2F3E2F]">{user?.full_name || user?.email}</p>
                 <p className="text-xs text-[#8F9779] capitalize">{user?.role}</p>
               </div>
             </div>

@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { User } from '../types';
 
 interface AuthContextType {
@@ -30,111 +31,149 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadUserProfile = async (userId: string) => {
+  const loadUserProfile = async (authUser: SupabaseUser) => { 
+    console.log('[AUTH] 🔍 Loading user profile for:', authUser?.email);
+    
     try {
-      const { data, error } = await supabase
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database query timeout')), 5000)
+      );
+
+      // First, check database state with timeout
+      console.log('[AUTH] 📊 Testing database connection...');
+      const dbCheckPromise = supabase
         .from('users')
         .select('*')
-        .eq('id', userId)
+        .limit(1);
+      
+      const { data: allUsers, error: dbError } = await Promise.race([
+        dbCheckPromise,
+        timeoutPromise
+      ]) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+      
+      console.log('[AUTH] 📊 Database state - total users:', allUsers?.length || 0);
+      if (dbError) {
+        console.error('[AUTH] ❌ Database error:', dbError);
+        throw dbError;
+      }
+
+      // Try to get the user profile with timeout
+      console.log('[AUTH] 🔍 Querying user profile for ID:', authUser.id);
+      const userQueryPromise = supabase
+        .from('users')
+        .select('*')
+        .eq('id', authUser.id)
         .single();
 
+      const { data: userData, error } = await Promise.race([
+        userQueryPromise,
+        timeoutPromise
+      ]) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
       if (error) {
-        // If user doesn't exist in custom users table, create one
+        console.error('[AUTH] ❌ Error loading user profile:', error);
+        
+        // If user doesn't exist, create them (fallback in case trigger didn't work)
         if (error.code === 'PGRST116') {
-          console.log('User profile not found, creating new profile...');
-          const { data: authUser } = await supabase.auth.getUser();
-          if (authUser.user) {
-            const { error: insertError } = await supabase
-              .from('users')
-              .insert([
-                {
-                  id: authUser.user.id,
-                  email: authUser.user.email!,
-                  name: authUser.user.user_metadata?.name || authUser.user.email!.split('@')[0],
-                  is_admin: authUser.user.email === 'admin@stocksight.com',
-                },
-              ]);
-            
-            if (insertError) {
-              console.error('Error creating user profile:', insertError);
-              // Fallback to auth user data
-              setUser({
-                id: authUser.user.id,
-                name: authUser.user.user_metadata?.name || authUser.user.email!.split('@')[0],
-                email: authUser.user.email!,
-                role: authUser.user.email === 'admin@stocksight.com' ? 'admin' : 'staff',
-                avatar: authUser.user.user_metadata?.avatar_url,
-              });
-              return;
-            }
-            
-            // Fetch the newly created profile
-            const { data: newProfile } = await supabase
-              .from('users')
-              .select('*')
-              .eq('id', userId)
-              .single();
-              
-            if (newProfile) {
-              setUser({
-                id: newProfile.id,
-                name: newProfile.name,
-                email: newProfile.email,
-                role: newProfile.is_admin ? 'admin' : 'staff',
-                avatar: newProfile.avatar_url,
-              });
-            }
+          console.log('[AUTH] 🔄 User profile not found, creating...');
+          
+          const newUserData = {
+            id: authUser.id,
+            email: authUser.email || '',
+            full_name: authUser.user_metadata?.full_name || (authUser.email?.split('@')[0] || 'User'),
+            role: 'user',
+            avatar_url: authUser.user_metadata?.avatar_url || null,
+          };
+
+          console.log('[AUTH] 📝 Creating user with data:', newUserData);
+
+          const createPromise = supabase
+            .from('users')
+            .insert([newUserData])
+            .select()
+            .single();
+
+          const { data: newUser, error: createError } = await Promise.race([
+            createPromise,
+            timeoutPromise
+          ]) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+          if (createError) {
+            console.error('[AUTH] ❌ Failed to create user profile:', createError);
+            throw createError;
           }
-        } else {
-          throw error;
+
+          console.log('[AUTH] ✅ User profile created:', newUser);
+          setUser(newUser);
+          return newUser;
         }
-        return;
+        throw error;
       }
 
-      setUser({
-        id: data.id,
-        name: data.name,
-        email: data.email,
-        role: data.is_admin ? 'admin' : 'staff',
-        avatar: data.avatar_url,
-      });
-    } catch (err) {
-      console.error('Error loading user profile:', err);
-      // Fallback: create user from auth data if profile loading fails
-      const { data: authUser } = await supabase.auth.getUser();
-      if (authUser.user) {
-        setUser({
-          id: authUser.user.id,
-          name: authUser.user.user_metadata?.name || authUser.user.email!.split('@')[0],
-          email: authUser.user.email!,
-          role: authUser.user.email === 'admin@stocksight.com' ? 'admin' : 'staff',
-          avatar: authUser.user.user_metadata?.avatar_url,
-        });
+      console.log('[AUTH] ✅ User profile loaded:', userData);
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      console.error('[AUTH] 💥 Failed to load user profile:', error);
+      
+      // If database is completely broken, create a fallback user
+      if (error instanceof Error && error.message.includes('timeout')) {
+        console.log('[AUTH] ⏰ Database timeout - using fallback user');
+        const fallbackUser = {
+          id: authUser.id,
+          email: authUser.email || '',
+          full_name: authUser.user_metadata?.full_name || 'User',
+          role: 'user',
+          avatar_url: null,
+          is_admin: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setUser(fallbackUser);
+        return fallbackUser;
       }
+      
+      setUser(null);
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   React.useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
+      console.log('[AUTH] 🔄 Checking existing session...');
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        await loadUserProfile(session.user.id);
+        console.log('[AUTH] 👤 Found existing session for:', session.user.email);
+        await loadUserProfile(session.user);
+      } else {
+        console.log('[AUTH] 🚫 No existing session found');
       }
     };
     
     checkUser();
 
     // Listen for auth changes
+    console.log('[AUTH] 🎧 Setting up auth state listener...');
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[AUTH] 🔔 Auth state change:', event, session?.user?.email || 'No user');
+      
       if (event === 'SIGNED_IN' && session?.user) {
-        await loadUserProfile(session.user.id);
+        console.log('[AUTH] ✅ User signed in, loading profile...');
+        await loadUserProfile(session.user);
       } else if (event === 'SIGNED_OUT') {
+        console.log('[AUTH] 👋 User signed out');
         setUser(null);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('[AUTH] 🔌 Cleaning up auth listener');
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -149,7 +188,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (error) throw error;
       
       if (data.user) {
-        await loadUserProfile(data.user.id);
+        await loadUserProfile(data.user);
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Sign in failed';
@@ -164,30 +203,78 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
+      console.log('[AUTH] 🚀 Starting sign up process for:', email, 'with name:', name);
+      
+      // Check if user already exists in database
+      console.log('[AUTH] 🔍 Checking if user already exists in database...');
+      const { data: existingUsers, error: checkError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email);
+        
+      if (checkError) {
+        console.log('[AUTH] ⚠️ Error checking existing users:', checkError);
+      } else {
+        console.log('[AUTH] 📊 Existing users check result:', existingUsers);
+        if (existingUsers && existingUsers.length > 0) {
+          throw new Error('User already registered');
+        }
+      }
+      
+      console.log('[AUTH] 📝 Calling Supabase auth.signUp...');
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            name: name, // This will be used by the database trigger
+          }
+        }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[AUTH] ❌ Supabase auth signup error:', error);
+        throw error;
+      }
+
+      console.log('[AUTH] ✅ Supabase auth signup successful:', {
+        user: data.user ? {
+          id: data.user.id,
+          email: data.user.email,
+          metadata: data.user.user_metadata
+        } : null,
+        session: data.session ? 'Session created' : 'No session'
+      });
 
       if (data.user) {
-        // Create user profile
-        const { error: profileError } = await supabase
+        console.log('[AUTH] ⏳ User created in auth, checking database trigger...');
+        
+        // Check database immediately
+        const { data: dbCheck1, error: dbError1 } = await supabase
           .from('users')
-          .insert([
-            {
-              id: data.user.id,
-              email: data.user.email!,
-              name,
-              is_admin: false,
-            },
-          ]);
-
-        if (profileError) throw profileError;
-        await loadUserProfile(data.user.id);
+          .select('*')
+          .eq('id', data.user.id);
+          
+        console.log('[AUTH] 🔍 Immediate DB check:', dbCheck1, 'Error:', dbError1);
+        
+        console.log('[AUTH] ⏱️ Waiting 2 seconds for database trigger...');
+        // Wait a moment for the database trigger to create the user profile
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Check database after delay
+        const { data: dbCheck2, error: dbError2 } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', data.user.id);
+          
+        console.log('[AUTH] 🔍 After delay DB check:', dbCheck2, 'Error:', dbError2);
+        
+        console.log('[AUTH] 🔄 Loading user profile...');
+        // Now load the user profile that was created by the trigger
+        await loadUserProfile(data.user);
       }
     } catch (error) {
+      console.error('[AUTH] 💥 Sign up error:', error);
       const message = error instanceof Error ? error.message : 'Sign up failed';
       setError(message);
       throw new Error(message);

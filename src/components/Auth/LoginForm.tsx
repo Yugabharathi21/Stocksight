@@ -18,7 +18,7 @@ const LoginForm: React.FC = () => {
       } else {
         await signIn(email, password);
       }
-    } catch (err) {
+    } catch {
       // Error is handled by the auth context
     }
   };
@@ -59,6 +59,7 @@ const LoginForm: React.FC = () => {
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-3 bg-[#F5F5F0] border border-[#A3B18A]/30 rounded-lg focus:outline-none focus:border-[#556B2F] focus:ring-2 focus:ring-[#556B2F]/20 transition-all duration-200"
                 placeholder="Enter your full name"
+                autoComplete="name"
                 required
               />
             </div>
@@ -74,6 +75,7 @@ const LoginForm: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 bg-[#F5F5F0] border border-[#A3B18A]/30 rounded-lg focus:outline-none focus:border-[#556B2F] focus:ring-2 focus:ring-[#556B2F]/20 transition-all duration-200"
               placeholder="Enter your email"
+              autoComplete="email"
               required
             />
           </div>
@@ -89,6 +91,7 @@ const LoginForm: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 bg-[#F5F5F0] border border-[#A3B18A]/30 rounded-lg focus:outline-none focus:border-[#556B2F] focus:ring-2 focus:ring-[#556B2F]/20 transition-all duration-200 pr-12"
                 placeholder="Enter your password"
+                autoComplete={isSignUp ? "new-password" : "current-password"}
                 required
                 minLength={6}
               />

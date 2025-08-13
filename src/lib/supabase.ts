@@ -17,16 +17,18 @@ export interface Database {
         Row: {
           id: string;
           email: string;
-          name: string;
+          full_name: string | null;
+          role: string;
           avatar_url: string | null;
           is_admin: boolean;
           created_at: string;
           updated_at: string;
         };
         Insert: {
-          id?: string;
+          id: string;
           email: string;
-          name: string;
+          full_name?: string | null;
+          role?: string;
           avatar_url?: string | null;
           is_admin?: boolean;
           created_at?: string;
@@ -35,7 +37,8 @@ export interface Database {
         Update: {
           id?: string;
           email?: string;
-          name?: string;
+          full_name?: string | null;
+          role?: string;
           avatar_url?: string | null;
           is_admin?: boolean;
           created_at?: string;
@@ -52,7 +55,7 @@ export interface Database {
           min_stock_level: number;
           max_stock_level: number;
           unit_price: number;
-          supplier_info: any;
+          supplier_info: Record<string, unknown>;
           created_at: string;
           updated_at: string;
         };
@@ -65,7 +68,7 @@ export interface Database {
           min_stock_level?: number;
           max_stock_level?: number;
           unit_price: number;
-          supplier_info?: any;
+          supplier_info?: Record<string, unknown>;
           created_at?: string;
           updated_at?: string;
         };
@@ -78,7 +81,7 @@ export interface Database {
           min_stock_level?: number;
           max_stock_level?: number;
           unit_price?: number;
-          supplier_info?: any;
+          supplier_info?: Record<string, unknown>;
           created_at?: string;
           updated_at?: string;
         };

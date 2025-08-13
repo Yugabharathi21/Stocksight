@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import { useAuth } from './contexts/AuthContext';
 import Sidebar from './components/Layout/Sidebar';
@@ -9,12 +9,25 @@ import ProductTable from './components/Products/ProductTable';
 import ForecastChart from './components/Dashboard/ForecastChart';
 import CSVUpload from './components/Upload/CSVUpload';
 import AlertsPanel from './components/Alerts/AlertsPanel';
+import ReportsPanel from './components/Reports/ReportsPanel';
 import { useSupabaseData } from './hooks/useSupabaseData';
+import { testDatabaseConnection, testUserCreation } from './utils/debugDatabase';
 
 const AppContent: React.FC = () => {
   const { user, isLoading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const { products, forecastData, isLoading } = useSupabaseData();
+
+  // Set up debug utilities on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).testDB = testDatabaseConnection; // eslint-disable-line @typescript-eslint/no-explicit-any
+      (window as any).testCreateUser = testUserCreation; // eslint-disable-line @typescript-eslint/no-explicit-any
+      console.log('[DEBUG] 🛠️ Debug utilities loaded:');
+      console.log('[DEBUG] 📋 window.testDB() - Test database connection');
+      console.log('[DEBUG] 👤 window.testCreateUser(email, name) - Test manual user creation');
+    }
+  }, []);
 
   if (authLoading) {
     return (
@@ -129,10 +142,7 @@ const AppContent: React.FC = () => {
               <h2 className="text-2xl font-bold text-[#2F3E2F] mb-2">Reports & Analytics</h2>
               <p className="text-[#8F9779]">Generate detailed reports and export data</p>
             </div>
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-[#A3B18A]/20 text-center">
-              <h3 className="text-lg font-medium text-[#8F9779] mb-4">Report Generation Coming Soon</h3>
-              <p className="text-[#A3B18A]">PDF export and detailed analytics features will be available in the next update.</p>
-            </div>
+            <ReportsPanel />
           </div>
         );
       case 'users':

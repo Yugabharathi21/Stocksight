@@ -11,6 +11,7 @@ import CSVUpload from './components/Upload/CSVUpload';
 import AlertsPanel from './components/Alerts/AlertsPanel';
 import ReportsPanel from './components/Reports/ReportsPanel';
 import UserManagement from './components/Users/UserManagement';
+import OrganizationManagement from './components/Organizations/OrganizationManagement';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { testDatabaseConnection, testUserCreation, makeUserAdmin } from './utils/debugDatabase';
 
@@ -150,6 +151,8 @@ const AppContent: React.FC = () => {
         );
       case 'users':
         return <UserManagement />;
+      case 'organizations':
+        return <OrganizationManagement />;
       case 'settings':
         return (
           <div className="space-y-6">

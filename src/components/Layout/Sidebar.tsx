@@ -9,7 +9,8 @@ import {
   TrendingUp,
   AlertTriangle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Building2
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -30,6 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     { id: 'upload', label: 'Upload Data', icon: Upload },
     { id: 'alerts', label: 'Alerts', icon: AlertTriangle },
     { id: 'reports', label: 'Reports', icon: FileText },
+    { id: 'organizations', label: 'Organizations', icon: Building2 },
     { id: 'users', label: 'Users', icon: Users },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];

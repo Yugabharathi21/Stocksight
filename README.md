@@ -22,6 +22,15 @@ A comprehensive inventory management system with advanced AI-powered demand fore
 - **Confidence Intervals** - Uncertainty quantification
 - **Multiple Model Support** - Prophet, SES, Moving Average, Naive models
 
+### TrendWise Pro Features (NEW!)
+- **Database-Driven Pipeline** - No file uploads required, direct database integration
+- **Auto Pipeline** - One-click training and prediction generation
+- **Smart Data Detection** - Automatic fallback to sample data when needed
+- **Real-Time Status Monitoring** - Live pipeline status and progress tracking
+- **Data Health Dashboard** - Comprehensive database connectivity and quality metrics
+- **Automatic Alert Generation** - Smart inventory alerts based on predictions
+- **Professional UI** - Advanced interface with multiple tabs and analytics
+
 ## 🏗️ Architecture
 
 ### Frontend
@@ -52,6 +61,23 @@ A comprehensive inventory management system with advanced AI-powered demand fore
 - Python 3.8+
 - npm or yarn
 - Supabase account
+
+### Quick Start
+```bash
+# Clone and setup
+git clone <repository-url>
+cd Stocksightmain
+
+# Install dependencies
+npm install
+pip install -r model/requirements.txt
+
+# Start the application
+npm run dev
+```
+
+### Professional Pipeline Setup
+The new TrendWise Pro feature is automatically available once the application is running. No additional setup required!
 
 ### 1. Clone the Repository
 ```bash

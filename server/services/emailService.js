@@ -125,6 +125,7 @@ class EmailService {
       <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4;">
         <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
           <div style="background-color: ${color}; color: white; padding: 20px; text-align: center;">
+            <img src="${process.env.FRONTEND_URL || 'http://localhost:5173'}/logo/stocksight.png" alt="Stocksight" style="height: 40px; margin-bottom: 10px;">
             <h1 style="margin: 0; font-size: 24px;">Stocksight Alert</h1>
           </div>
           <div style="padding: 30px;">
@@ -162,6 +163,7 @@ class EmailService {
       <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4;">
         <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
           <div style="background-color: #3B82F6; color: white; padding: 20px; text-align: center;">
+            <img src="${process.env.FRONTEND_URL || 'http://localhost:5173'}/logo/stocksight.png" alt="Stocksight" style="height: 40px; margin-bottom: 10px;">
             <h1 style="margin: 0; font-size: 24px;">📊 Daily Inventory Report</h1>
             <p style="margin: 5px 0 0 0; opacity: 0.9;">${new Date().toLocaleDateString()}</p>
           </div>
@@ -220,6 +222,7 @@ class EmailService {
       <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4;">
         <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
           <div style="background-color: #F59E0B; color: white; padding: 20px; text-align: center;">
+            <img src="${process.env.FRONTEND_URL || 'http://localhost:5173'}/logo/stocksight.png" alt="Stocksight" style="height: 40px; margin-bottom: 10px;">
             <h1 style="margin: 0; font-size: 24px;">⚠️ Low Stock Alert</h1>
             <p style="margin: 5px 0 0 0; opacity: 0.9;">${products.length} product${products.length > 1 ? 's' : ''} need immediate attention</p>
           </div>
@@ -263,6 +266,7 @@ class EmailService {
       <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4;">
         <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
           <div style="background-color: #10B981; color: white; padding: 20px; text-align: center;">
+            <img src="${process.env.FRONTEND_URL || 'http://localhost:5173'}/logo/stocksight.png" alt="Stocksight" style="height: 40px; margin-bottom: 10px;">
             <h1 style="margin: 0; font-size: 24px;">📈 Weekly Forecast Update</h1>
             <p style="margin: 5px 0 0 0; opacity: 0.9;">Demand predictions for the upcoming week</p>
           </div>
@@ -307,6 +311,7 @@ class EmailService {
       <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4;">
         <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
           <div style="background-color: #8B5CF6; color: white; padding: 20px; text-align: center;">
+            <img src="${process.env.FRONTEND_URL || 'http://localhost:5173'}/logo/stocksight.png" alt="Stocksight" style="height: 40px; margin-bottom: 10px;">
             <h1 style="margin: 0; font-size: 24px;">🚀 High Demand Alert</h1>
             <p style="margin: 5px 0 0 0; opacity: 0.9;">${products.length} product${products.length > 1 ? 's' : ''} showing increased demand</p>
           </div>
@@ -356,6 +361,7 @@ class EmailService {
       <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4;">
         <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
           <div style="background-color: #10B981; color: white; padding: 20px; text-align: center;">
+            <img src="${process.env.FRONTEND_URL || 'http://localhost:5173'}/logo/stocksight.png" alt="Stocksight" style="height: 40px; margin-bottom: 10px;">
             <h1 style="margin: 0; font-size: 24px;">🏥 System Health Report</h1>
             <p style="margin: 5px 0 0 0; opacity: 0.9;">All systems operational</p>
           </div>

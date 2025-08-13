@@ -4,7 +4,6 @@ import {
   Package, 
   Upload, 
   Settings, 
-  Bell, 
   FileText,
   Users,
   TrendingUp,
@@ -55,8 +54,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
 
       <div className="p-6 border-b border-[#A3B18A]/20">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-[#556B2F] rounded-lg flex items-center justify-center">
-            <BarChart3 className="h-6 w-6 text-white" />
+          <div className="w-10 h-10 bg-transparent rounded-lg flex items-center justify-center">
+            <img 
+              src="/logo/stocksight.png" 
+              alt="Stocksight Logo" 
+              className="w-10 h-10 object-contain"
+            />
           </div>
           {shouldShowExpanded && (
             <div className="transition-opacity duration-200">

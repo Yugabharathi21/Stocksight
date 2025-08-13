@@ -129,17 +129,21 @@ const TrendWisePro: React.FC = () => {
 
   const runAutoPipeline = async () => {
     try {
+      console.log('[DEBUG] Starting auto pipeline...');
       setIsLoading(true);
       setPipelineStatus('training');
       setMessage({ type: 'info', text: 'Starting auto pipeline...' });
 
+      console.log('[DEBUG] Making API call to /api/trendwise-db/auto-pipeline');
       const response = await fetch('/api/trendwise-db/auto-pipeline', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ leadTimeDays })
       });
 
+      console.log('[DEBUG] Response status:', response.status);
       const data = await response.json();
+      console.log('[DEBUG] Response data:', data);
 
       if (data.success) {
         setPipelineStatus('completed');
@@ -155,8 +159,9 @@ const TrendWisePro: React.FC = () => {
         throw new Error(data.error || 'Pipeline failed');
       }
     } catch (error) {
+      console.error('[DEBUG] Pipeline error:', error);
       setPipelineStatus('error');
-      setMessage({ type: 'error', text: `Pipeline failed: ${error.message}` });
+      setMessage({ type: 'error', text: `Pipeline failed: ${error instanceof Error ? error.message : 'Unknown error'}` });
     } finally {
       setIsLoading(false);
     }
@@ -164,16 +169,20 @@ const TrendWisePro: React.FC = () => {
 
   const runDemo = async () => {
     try {
+      console.log('[DEBUG] Starting demo...');
       setIsLoading(true);
       setMessage({ type: 'info', text: 'Running demo with database data...' });
 
+      console.log('[DEBUG] Making API call to /api/trendwise-db/demo');
       const response = await fetch('/api/trendwise-db/demo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ leadTimeDays })
       });
 
+      console.log('[DEBUG] Response status:', response.status);
       const data = await response.json();
+      console.log('[DEBUG] Response data:', data);
 
       if (data.success) {
         setPredictions(data.results.predictions || []);
@@ -185,7 +194,8 @@ const TrendWisePro: React.FC = () => {
         throw new Error(data.error || 'Demo failed');
       }
     } catch (error) {
-      setMessage({ type: 'error', text: `Demo failed: ${error.message}` });
+      console.error('[DEBUG] Demo error:', error);
+      setMessage({ type: 'error', text: `Demo failed: ${error instanceof Error ? error.message : 'Unknown error'}` });
     } finally {
       setIsLoading(false);
     }
@@ -211,7 +221,7 @@ const TrendWisePro: React.FC = () => {
         throw new Error(data.error || 'Data refresh failed');
       }
     } catch (error) {
-      setMessage({ type: 'error', text: `Data refresh failed: ${error.message}` });
+      setMessage({ type: 'error', text: `Data refresh failed: ${error instanceof Error ? error.message : 'Unknown error'}` });
     } finally {
       setIsLoading(false);
     }

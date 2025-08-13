@@ -150,6 +150,69 @@ def load_existing_csv_and_train():
     return forecaster, predictions
 
 if __name__ == "__main__":
+    import argparse
+    import sys
+    
+    parser = argparse.ArgumentParser(description='TrendWise Demand Forecaster CLI')
+    parser.add_argument('--demo', action='store_true', help='Run quick demo')
+    parser.add_argument('--train', action='store_true', help='Train model with uploaded files')
+    parser.add_argument('--predict', action='store_true', help='Make predictions with uploaded files')
+    parser.add_argument('--generate', action='store_true', help='Generate sample data')
+    parser.add_argument('--sales-file', type=str, help='Path to sales CSV file')
+    parser.add_argument('--inventory-file', type=str, help='Path to inventory CSV file')
+    parser.add_argument('--lead-time', type=int, default=7, help='Lead time in days')
+    parser.add_argument('--start-date', type=str, help='Start date for sample data')
+    parser.add_argument('--end-date', type=str, help='End date for sample data')
+    parser.add_argument('--products', type=str, help='Products to generate (JSON string or "all")')
+    
+    args = parser.parse_args()
+    
+    # Handle command line arguments
+    if args.demo:
+        print("=== Running Quick Demo ===")
+        quick_test()
+        sys.exit(0)
+    
+    if args.generate:
+        print("=== Generating Sample Data ===")
+        generator = SampleDataGenerator()
+        generator.save_sample_data("model/sample_data")
+        print("Sample data generated successfully!")
+        sys.exit(0)
+    
+    if args.train:
+        print("=== Training Model ===")
+        if args.sales_file and args.inventory_file:
+            sales_df = pd.read_csv(args.sales_file)
+            inventory_df = pd.read_csv(args.inventory_file)
+            sales_df['date'] = pd.to_datetime(sales_df['date'])
+            
+            forecaster = TrendWiseForecaster()
+            training_result = forecaster.train_forecaster(sales_df)
+            print(f"Training completed! Trained models for {len(training_result)} SKUs")
+        else:
+            print("Error: Both --sales-file and --inventory-file are required for training")
+            sys.exit(1)
+        sys.exit(0)
+    
+    if args.predict:
+        print("=== Making Predictions ===")
+        if args.sales_file and args.inventory_file:
+            sales_df = pd.read_csv(args.sales_file)
+            inventory_df = pd.read_csv(args.inventory_file)
+            sales_df['date'] = pd.to_datetime(sales_df['date'])
+            
+            forecaster = TrendWiseForecaster()
+            predictions = forecaster.predict_demand(sales_df, inventory_df, args.lead_time)
+            print(f"Generated {len(predictions)} predictions:")
+            for pred in predictions:
+                print(f"{pred['sku']}: {pred['point_forecast']:.1f} units - {pred['recommendation']}")
+        else:
+            print("Error: Both --sales-file and --inventory-file are required for predictions")
+            sys.exit(1)
+        sys.exit(0)
+    
+    # Interactive mode (original behavior)
     print("TrendWise Demand Forecaster - Sample Data Usage Guide")
     print("=" * 60)
     

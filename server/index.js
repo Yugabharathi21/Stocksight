@@ -15,6 +15,8 @@ import alertsRoutes from './routes/alerts.js';
 import forecastsRoutes from './routes/forecasts.js';
 import notificationsRoutes from './routes/notifications.js';
 import organizationRoutes from './routes/organizationRoutes.js';
+import trendwiseRoutes from './routes/trendwise.js';
+import trendwiseDBRoutes from './routes/trendwiseDB.js';
 
 // Import services and config
 import { testConnection } from './config/database.js';
@@ -81,6 +83,8 @@ app.use('/api/alerts', alertsRoutes);
 app.use('/api/forecasts', forecastsRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/organizations', organizationRoutes);
+app.use('/api/trendwise', trendwiseRoutes);
+app.use('/api/trendwise-db', trendwiseDBRoutes);
 
 // CSV Upload endpoint (keeping as utility endpoint)
 app.post('/api/upload-csv', upload.single('csvFile'), (req, res) => {

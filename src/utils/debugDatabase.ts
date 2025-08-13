@@ -110,8 +110,45 @@ export const testUserCreation = async (email: string, fullName: string) => {
   }
 };
 
+export const makeUserAdmin = async (email: string) => {
+  console.log('[DEBUG] 👑 Making user admin:', email);
+  
+  try {
+    const { error } = await supabase.rpc('make_user_admin', {
+      user_email: email
+    });
+
+    if (error) {
+      console.error('[DEBUG] ❌ Error making user admin:', error);
+      return { error };
+    }
+
+    console.log('[DEBUG] ✅ User made admin successfully');
+    
+    // Verify the change
+    const { data: userData, error: fetchError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (fetchError) {
+      console.error('[DEBUG] ❌ Error fetching updated user:', fetchError);
+      return { error: fetchError };
+    }
+
+    console.log('[DEBUG] 👤 Updated user:', userData);
+    return { user: userData };
+    
+  } catch (error) {
+    console.error('[DEBUG] 💥 Failed to make user admin:', error);
+    return { error };
+  }
+};
+
 // Add functions to window for manual testing
 if (typeof window !== 'undefined') {
   (window as any).testDB = testDatabaseConnection; // eslint-disable-line @typescript-eslint/no-explicit-any
   (window as any).testCreateUser = testUserCreation; // eslint-disable-line @typescript-eslint/no-explicit-any
+  (window as any).makeAdmin = makeUserAdmin; // eslint-disable-line @typescript-eslint/no-explicit-any
 }

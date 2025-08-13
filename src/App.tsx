@@ -10,8 +10,9 @@ import ForecastChart from './components/Dashboard/ForecastChart';
 import CSVUpload from './components/Upload/CSVUpload';
 import AlertsPanel from './components/Alerts/AlertsPanel';
 import ReportsPanel from './components/Reports/ReportsPanel';
+import UserManagement from './components/Users/UserManagement';
 import { useSupabaseData } from './hooks/useSupabaseData';
-import { testDatabaseConnection, testUserCreation } from './utils/debugDatabase';
+import { testDatabaseConnection, testUserCreation, makeUserAdmin } from './utils/debugDatabase';
 
 const AppContent: React.FC = () => {
   const { user, isLoading: authLoading } = useAuth();
@@ -23,9 +24,11 @@ const AppContent: React.FC = () => {
     if (typeof window !== 'undefined') {
       (window as any).testDB = testDatabaseConnection; // eslint-disable-line @typescript-eslint/no-explicit-any
       (window as any).testCreateUser = testUserCreation; // eslint-disable-line @typescript-eslint/no-explicit-any
+      (window as any).makeAdmin = makeUserAdmin; // eslint-disable-line @typescript-eslint/no-explicit-any
       console.log('[DEBUG] 🛠️ Debug utilities loaded:');
       console.log('[DEBUG] 📋 window.testDB() - Test database connection');
       console.log('[DEBUG] 👤 window.testCreateUser(email, name) - Test manual user creation');
+      console.log('[DEBUG] 👑 window.makeAdmin(email) - Make user admin');
     }
   }, []);
 
@@ -146,18 +149,7 @@ const AppContent: React.FC = () => {
           </div>
         );
       case 'users':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-[#2F3E2F] mb-2">User Management</h2>
-              <p className="text-[#8F9779]">Manage team access and permissions</p>
-            </div>
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-[#A3B18A]/20 text-center">
-              <h3 className="text-lg font-medium text-[#8F9779] mb-4">User Management Coming Soon</h3>
-              <p className="text-[#A3B18A]">Role-based access control features will be available in the next update.</p>
-            </div>
-          </div>
-        );
+        return <UserManagement />;
       case 'settings':
         return (
           <div className="space-y-6">
